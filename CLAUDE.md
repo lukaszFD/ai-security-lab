@@ -1,10 +1,10 @@
 # ai-security-lab: instrukcje dla Claude Code
 
-Projekt zespołowy na studia podyplomowe „Architektura AI w organizacji”. Asystent AI (RAG + agent z narzędziami) na fikcyjnych dokumentach firmy. Mierzymy, jak warstwy kontroli (tożsamość agenta, OPA, RLS, kontroler wyjścia, audyt) wpływają na szczelność, jakość i koszt.
+Projekt zespołowy na studia podyplomowe „Architektura AI w organizacji” (połączone pomysły Bartka i Łukasza). Asystent AI (RAG + agent z narzędziami) na fikcyjnych dokumentach firmy. Mierzymy, jak warstwy ochrony prywatności i kontroli agenta (tożsamość agenta, RLS, OPA, pseudonimizacja, model lokalny, kontroler wyjścia, audyt) wpływają na szczelność, jakość i koszt.
 
 ## Najważniejsze dokumenty
 - `docs/architektura.md`: architektura techniczna. Czytaj przed każdą większą zmianą.
-- `docs/kto-pilnuje-agenta.md`: krótki opis pomysłu dla zespołu.
+- `docs/kto-pilnuje-agenta.md`: krótki opis wspólnego pomysłu dla zespołu.
 - `docs/adr/`: decyzje architektoniczne.
 
 ## Zasady bezwzględne

@@ -1,6 +1,6 @@
 ---
 name: run-eval
-description: Run the full evaluation (quality questions + red-team attacks) for one or more variants V0-V4 and record results in eval/results. Use when the team wants measurements for the results table.
+description: Run the full evaluation (quality questions + red-team attacks) for one or more variants V0-V5 (on Gemini or Ollama) and record results in eval/results. Use when the team wants measurements for the results table.
 ---
 
 # Pomiar wariantów
@@ -15,18 +15,21 @@ description: Run the full evaluation (quality questions + red-team attacks) for 
    ```bash
    ansible-playbook -i ansible/inventory/measure.yml ansible/site.yml
    ```
-3. Zapisz konfigurację pomiaru: commit SHA, wariant, model (np. `gemini-flash` lub model w Ollama), data.
+3. Zapisz konfigurację pomiaru: commit SHA, wariant, model (np. `gemini-flash` lub model w Ollama), data. Minimum do tabeli: V0, V2 i V4 na obu modelach (`docs/architektura.md`, sekcja 7).
 4. Uruchom:
    - jakość: `python -m eval.quality --variant V2 --questions data/questions.yaml`
    - ataki: `npx promptfoo eval -c redteam/promptfooconfig.yaml --output eval/results/V2-redteam.json`
+   - wykrywanie danych osobowych (raz na zmianę w `src/pseudonymizer/`, niezależnie od wariantu): `python -m eval.pii --data data/pii_labeled/`
 5. Zbierz metryki (definicje w `docs/architektura.md`, sekcja 8):
    - skuteczność ataków (kanarki w odpowiedzi, maile poza domenę),
+   - wyciek do dostawcy: dane osobowe i kanarki w promptach wysłanych do zewnętrznego API (Langfuse),
+   - precision / recall Presidio, osobno dla odmienionych nazwisk,
    - precision / recall kontrolera wyjścia, fałszywe blokady,
    - ocena jakości (sędzia 1–5) + ręcznie sprawdzona próbka min. 10 odpowiedzi,
    - % ataków odtwarzalnych z `audit_events`,
    - tokeny i opóźnienie na pytanie (Langfuse).
 6. Dopisz wiersz do `eval/results/summary.csv`:
-   `date,commit,variant,model,attack_success_rate,controller_precision,controller_recall,false_block_rate,quality_avg,traceability,avg_tokens,avg_latency_ms`
+   `date,commit,variant,model,attack_success_rate,provider_pii_leaks,pii_precision,pii_recall,controller_precision,controller_recall,false_block_rate,quality_avg,traceability,avg_tokens,avg_latency_ms`
 7. Każdy udany atak przekaż do skilla `attack-regression`.
 
 ## Limity darmowego Gemini

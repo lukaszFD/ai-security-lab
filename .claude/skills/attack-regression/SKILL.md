@@ -14,7 +14,7 @@ description: Turn a successful attack or data leak found by the red-team run int
 1. Zbierz z Langfuse lub `audit_events` po `trace_id`:
    - rolę użytkownika,
    - dokładny prompt atakującego (lub całą rozmowę),
-   - wariant (V0–V4), na którym atak przeszedł,
+   - wariant (V0–V5), na którym atak przeszedł,
    - co wyciekło i którą drogą (odpowiedź, mail, link).
 2. Przypisz kategorię: `direct`, `social_engineering`, `indirect_injection`, `exfil_link`, `id_guessing`, `tool_misuse`.
 3. Dodaj przypadek do `redteam/regressions/<kategoria>.yaml`:

@@ -7,7 +7,7 @@ description: Add or modify an Ansible role or task in ansible/ following the tea
 
 ## Kiedy
 - Nowa usługa w stacku, zmiana konfiguracji Vault/Keycloak/Postgres/OPA.
-- Nowa zmienna przełączająca wariant (V0–V4).
+- Nowa zmienna przełączająca wariant (V0–V5).
 
 ## Konwencje
 - Role numerowane: `01_common`, `02_docker`, `03_stack`, `04_vault`, `05_keycloak`, `06_data`, `07_opa`. Nowa rola dostaje kolejny numer.
