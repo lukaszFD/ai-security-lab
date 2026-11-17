@@ -30,7 +30,7 @@ Przy polu podajemy najsłabszy status. Nie wymyślamy liczb: brak danych oznacza
 |---|---|---|
 | Łukasz Dejko | IAM/PAM w banku, konta techniczne i agenci AI. W projekcie: kontrola agenta (tożsamość, OPA - Open Policy Agent, audyt). | Przenieść praktykę IAM/PAM na tożsamości nieludzkie (agentów AI): least privilege egzekwowany poza modelem (OPA, RLS (Row-Level Security), krótkotrwałe poświadczenia z Vaulta) i weryfikowalny metrykami: nadmiarowe uprawnienia, odrzucone próby eskalacji, kompletność śladu audytowego. |
 | Bartosz Lepa | W projekcie: ochrona danych (pseudonimizacja, Presidio, model lokalny, RODO), autor tematu. | Zmierzyć, ile jakości kosztuje ochrona prywatności, i umieć to uzasadnić. |
-| Jaromir Komski | | Nauczyć się oceniać systemy AI i stawiać warunki ich wdrożenia. |
+| Jaromir Komski | Koordynacja integracji sieci IT z OT w przemyśle produkcyjnym (obecnie medTech). | Nauczyć się formułować hipotezę wartości i sprawdzać jej założenia przy integracji AI w przemyśle, a także oceniać systemy AI i stawiać warunki ich wdrożenia pod kątem kosztów i bezpieczeństwa. |
 | Piotr Czeczko | | Praktyka w ocenie jakości i bezpieczeństwa asystenta AI na danych firmy. |
 
 #### Sekcje karty
