@@ -31,7 +31,7 @@ Przy polu podajemy najsłabszy status. Nie wymyślamy liczb: brak danych oznacza
 | Łukasz Dejko | IAM/PAM w banku, konta techniczne i agenci AI. W projekcie: kontrola agenta (tożsamość, OPA, audyt). | Przenieść praktykę IAM/PAM na tożsamości nieludzkie (agentów AI): least privilege egzekwowany poza modelem (OPA, RLS, krótkotrwałe poświadczenia z Vaulta) i weryfikowalny metrykami: nadmiarowe uprawnienia, odrzucone próby eskalacji, kompletność śladu audytowego. |
 | Bartosz Lepa | W projekcie: ochrona danych (pseudonimizacja, Presidio, model lokalny, RODO), autor tematu. | Zmierzyć, ile jakości kosztuje ochrona prywatności, i umieć to uzasadnić. |
 | Jaromir Komski | (do uzupełnienia) | Nauczyć się oceniać systemy AI i stawiać warunki ich wdrożenia. |
-| Piotr Czeczko | (do uzupełnienia) | Praktyka w ocenie jakości i bezpieczeństwa asystenta AI na danych firmy. |
+| Piotr Czeczko | Senior PostgreSQL/Oracle DBA, wydajność i migracje AWS RDS/Aurora; ISO 27001 Lead Auditor. W projekcie: warstwa danych (RLS w PostgreSQL/pgvector, tabela audytu, pomiar narzutu i poprawności kontroli uprawnień). | Praktyka w ocenie jakości i bezpieczeństwa asystenta AI na danych firmy. Umieć zamienić ryzyka asystenta AI na kontrole i mierzalne kryteria wdrożenia, tak jak w audycie bezpieczeństwa. |
 
 #### Sekcje karty
 
