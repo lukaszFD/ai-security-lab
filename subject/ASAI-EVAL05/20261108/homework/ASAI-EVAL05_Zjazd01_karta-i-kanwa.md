@@ -21,17 +21,17 @@ Przy polu podajemy najsłabszy status. Nie wymyślamy liczb: brak danych oznacza
 
 | Pole | Wartość |
 |---|---|
-| Grupa | Asystent AI na danych wrażliwych (ai-security-lab) |
+| Grupa | Asystent AI na danych wrażliwych |
 | System (jednym zdaniem) | Asystent AI (RAG + agent z narzędziami) odpowiadający pracownikom na podstawie dokumentów firmy, z warstwami ochrony danych i kontroli agenta (dane syntetyczne). |
 
 #### Członkowie
 
 | Imię | Rola: czym się zajmuję | Czego oczekuję od kursu lub projektu |
 |---|---|---|
-| Łukasz Dejko | IAM/PAM w banku, konta techniczne i agenci AI. W projekcie: kontrola agenta (tożsamość, OPA, audyt). | Przenieść praktykę IAM/PAM na tożsamości nieludzkie (agentów AI): least privilege egzekwowany poza modelem (OPA, RLS, krótkotrwałe poświadczenia z Vaulta) i weryfikowalny metrykami: nadmiarowe uprawnienia, odrzucone próby eskalacji, kompletność śladu audytowego. |
+| Łukasz Dejko | IAM/PAM w banku, konta techniczne i agenci AI. W projekcie: kontrola agenta (tożsamość, OPA - Open Policy Agent, audyt). | Przenieść praktykę IAM/PAM na tożsamości nieludzkie (agentów AI): least privilege egzekwowany poza modelem (OPA, RLS (Row-Level Security), krótkotrwałe poświadczenia z Vaulta) i weryfikowalny metrykami: nadmiarowe uprawnienia, odrzucone próby eskalacji, kompletność śladu audytowego. |
 | Bartosz Lepa | W projekcie: ochrona danych (pseudonimizacja, Presidio, model lokalny, RODO), autor tematu. | Zmierzyć, ile jakości kosztuje ochrona prywatności, i umieć to uzasadnić. |
-| Jaromir Komski | (do uzupełnienia) | Nauczyć się oceniać systemy AI i stawiać warunki ich wdrożenia. |
-| Piotr Czeczko | (do uzupełnienia) | Praktyka w ocenie jakości i bezpieczeństwa asystenta AI na danych firmy. |
+| Jaromir Komski | | Nauczyć się oceniać systemy AI i stawiać warunki ich wdrożenia. |
+| Piotr Czeczko | | Praktyka w ocenie jakości i bezpieczeństwa asystenta AI na danych firmy. |
 
 #### Sekcje karty
 
@@ -59,14 +59,14 @@ Kanwa: pole 1. Status: **D**
 
 *Opis pola: od czego zaczęło się wdrożenie: zlecenie albo pomysł. Słowo w słowo, bez poprawiania. Kto je wydał, kiedy, przy jakiej okazji.*
 
-„Ile jakości i kosztu kosztuje każdy poziom ochrony prywatności i kontroli agenta?” Pomysł zespołu, propozycja tematu projektu, 12.11.2026.
+Ile tracimy na jakości i ile dopłacamy za każdą warstwę ochrony prywatności i kontroli agenta?.
 
 #### A2. Hipoteza wartości (minimum)
 Kanwa: pole 3. Status: **Z**
 
 *Opis pola: co ma się poprawić dzięki systemowi, zapisane tak, żeby dało się to sprawdzić: Jeżeli [system robi X], to dla [kogo] poprawi się [rezultat], mierzone [jak], w horyzoncie [kiedy], bez pogorszenia [czego]. Rezultat dla ludzi, nie opis systemu.*
 
-Jeżeli asystent odpowiada pracownikom tylko z dokumentów, do których mają prawo, i nie wysyła danych osobowych do dostawcy modelu, to dla pracowników serwisu, HR i kierowników poprawi się dostęp do informacji, mierzone oceną jakości odpowiedzi na 30–50 pytaniach testowych, w horyzoncie 10 tygodni projektu, bez pogorszenia ochrony osób z dokumentów: zero wycieków w atakach testowych.
+Jeżeli asystent odpowiada pracownikom tylko z dokumentów, do których mają prawo, i nie wysyła danych osobowych do dostawcy modelu, to dla pracowników serwisu, HR i kierowników poprawi się dostęp do informacji, mierzone oceną jakości odpowiedzi na 30–50 pytaniach testowych, bez pogorszenia ochrony osób z dokumentów: zero wycieków w atakach testowych.
 
 #### A3. Zamierzone przeznaczenie
 
@@ -88,8 +88,8 @@ Kanwa: nagłówek.
 
 | Pole | Wartość |
 |---|---|
-| Adresat (rola lub gremium, które decyduje) | CISO i IOD fikcyjnej firmy |
-| Termin decyzji | koniec projektu, styczeń 2027 (ok. 10 tygodni) |
+| Adresat (rola lub gremium, które decyduje) | CISO i Inspektor Ochrony Danych fikcyjnej firmy |
+| Termin decyzji | koniec projektu |
 
 #### A5. Proces dziś i po zmianie
 Kanwa: pole 1.
@@ -99,7 +99,7 @@ Kanwa: pole 1.
 | Krok | Kto dziś | Po zmianie | Czas lub koszt | Status |
 |---|---|---|---|---|
 | 1. Pracownik szuka informacji | pracownik | pracownik pyta AI | brak danych | Z |
-| 2. Sprawdzenie uprawnień | uprawnienia do folderów | OPA + RLS (automat) | do zmierzenia (ms) | Z |
+| 2. Sprawdzenie uprawnień | uprawnienia do folderów | OPA  + RLS (automat) | do zmierzenia (ms) | Z |
 | 3. Wyszukanie i czytanie dokumentów | pracownik | AI | brak danych | Z |
 | 4. Usunięcie danych osobowych przed modelem | nie dotyczy | automat (pseudonimizacja) | do zmierzenia (ms) | Z |
 | 5. Odpowiedź lub działanie (np. mail) | pracownik | AI + człowiek | brak danych | Z |
@@ -121,7 +121,7 @@ Kanwa: pole 2. Status: **Z**
 | Korzysta z systemu | pracownicy: serwis, HR, kierownicy | brak danych | każdy widzi tylko swoje dokumenty |
 | Decyduje o dalszym prowadzeniu | CISO i właściciel systemu | brak danych | fikcyjna firma |
 | Ponosi skutek błędu | osoby z dokumentów (pracownicy, kontrahenci) | brak danych | nie widzą systemu ani wycieku |
-| Może zablokować wdrożenie | IOD, CISO, właściciel danych HR | brak danych | dane osobowe, wysyłka do dostawcy |
+| Może zablokować wdrożenie | Inspektor Ochrony Danych, CISO, właściciel danych HR | brak danych | dane osobowe, wysyłka do dostawcy |
 
 #### A7. Dane
 Kanwa: pole 4.
@@ -182,7 +182,7 @@ Porażka 1. Po jednym wycieku danych spoza uprawnień wyłączamy agentowi dost�
 
 | Imię | Twierdzenie (pole) | Jak sprawdzone albo jak sprawdzić, źródło | Status po |
 |---|---|---|---|
-| Łukasz | A6 kto może zablokować | Propozycja: rozmowa z IOD i zespołem bezpieczeństwa o warunkach dla danych HR. | Z |
+| Łukasz | A6 kto może zablokować | Propozycja: rozmowa z Inspektor Ochrony Danych i zespołem bezpieczeństwa o warunkach dla danych HR. | Z |
 | Bartosz | A2 bez pogorszenia jakości | Propozycja: pomiar V0 i V3 na 30–50 pytaniach, sędzia + 10 odpowiedzi ręcznie. | Z |
 | Jaromir | B2 porażka 2 | Propozycja: odsetek fałszywych blokad kontroli wyjścia dla uprawnionych ról. | Z |
 | Piotr | A7 czego brakuje | Propozycja: recall Presidio na danych synt. i na ręcznie pisanych tekstach z odmianą nazwisk. | Z |
@@ -198,7 +198,7 @@ Porażka 1. Po jednym wycieku danych spoza uprawnień wyłączamy agentowi dost�
 | Data | 16.11.2026 |
 | Wersja | 0 (pozostałe opcje: przegląd, końcowa) |
 
-**Pytanie decyzyjne, adresat, termin (A4):** Na jakich warunkach (warstwy ochrony, model zewnętrzny czy lokalny) udostępnić pracownikom asystenta AI na dokumentach wewnętrznych z danymi wrażliwymi? Adresat: CISO i IOD fikcyjnej firmy. Termin: styczeń 2027.
+**Pytanie decyzyjne, adresat, termin (A4):** Na jakich warunkach (warstwy ochrony, model zewnętrzny czy lokalny) udostępnić pracownikom asystenta AI na dokumentach wewnętrznych z danymi wrażliwymi? Adresat: CISO i Inspektor Ochrony Danych fikcyjnej firmy. Termin: styczeń 2027.
 
 ### Wiersz „Przekonanie”
 
@@ -207,7 +207,11 @@ Status: **Z**. Źródło w karcie: A, D, J.
 
 *Opis pola: co nam polecono i jak ta praca wygląda dziś: kto ją robi, ile trwa, ile kosztuje? Wolumen na tydzień lub miesiąc, ze znacznikiem.*
 
-„Ile jakości i kosztu kosztuje każdy poziom ochrony prywatności i kontroli agenta?” (pomysł zespołu). Dziś pracownik sam szuka w dokumentach; czas i wolumen nieznane [Z]. Ryzyko: agent na wspólnym koncie technicznym widzi wszystko [Z].
+Pytanie badawcze: ile jakości odpowiedzi tracimy i ile dopłacamy za każdą warstwę ochrony prywatności i kontroli agenta?
+
+Stan obecny: pracownicy sami przeszukują dokumenty. Nie wiemy, ile czasu im to zajmuje ani ile jest takich wyszukiwań [Z].
+
+Główne ryzyko: agent działający na wspólnym koncie technicznym ma dostęp do wszystkich dokumentów, niezależnie od tego, kto zadaje pytanie [Z].
 
 #### 2. Ludzie
 Status: **Z**. Źródło w karcie: A.
@@ -217,7 +221,7 @@ Status: **Z**. Źródło w karcie: A.
 - **Korzysta:** pracownicy serwisu, HR, kierownicy.
 - **Decyduje:** CISO i właściciel systemu.
 - **Ponosi skutek:** osoby z dokumentów (pracownicy, kontrahenci), które systemu nie widzą.
-- **Może zablokować:** IOD, CISO, właściciel danych HR.
+- **Może zablokować:** Inspektor Ochrony Danych, CISO, właściciel danych HR.
 
 #### 3. Hipoteza wartości
 Status: **Z**. Źródło w karcie: A, E.
@@ -304,11 +308,3 @@ W wersji 0 bez rekomendacji. Za mało wiemy.
 |---|---|
 | Decyzja (GO / GO WITH CONDITIONS / PILOT / REWORK / PIVOT / STOP / RETIRE) | nie wybrano (wersja 0) |
 | Pewność (wysoka / średnia / niska) | nie wybrano (wersja 0) |
-
----
-
-## Do uzupełnienia
-
-- „Czym się zajmuję” dla Jaromira i Piotra.
-- Pytania od innej grupy (dostaniemy je na zajęciach).
-- Weryfikacja wpisów w kolumnie „Czego oczekuję” i podziału twierdzeń w „Wkładzie osobistym” przez każdą osobę.
