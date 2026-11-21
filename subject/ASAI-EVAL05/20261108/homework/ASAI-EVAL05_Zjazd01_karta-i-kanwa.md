@@ -228,7 +228,7 @@ Status: **Z**. Źródło w karcie: A, E.
 
 *Opis pola: jeżeli system robi X, to dla kogo poprawi się co, mierzone jak, kiedy, bez pogorszenia czego? Rezultat, nie opis systemu; „bez pogorszenia” jest obowiązkowe.*
 
-Jeżeli asystent odpowiada tylko z dokumentów, do których pytający ma prawo, i nie wysyła danych osobowych do dostawcy modelu, to dla pracowników poprawi się dostęp do informacji, mierzone oceną jakości na 30–50 pytaniach testowych, w 10 tygodni, bez pogorszenia ochrony osób z dokumentów (zero wycieków w atakach testowych).
+Jeżeli asystent odpowiada pracownikom serwisu tylko z dokumentów, do których mają prawo, i nie wysyła danych osobowych do dostawcy modelu, to szybciej przygotują się do obsługi klienta, mierzone czasem znalezienia odpowiedzi (z ok. 15 do ok. 2 min [Z]) i % pytań sprawdzanych ręcznie, w 10 tygodni (do końca stycznia 2027), bez pogorszenia ochrony osób z dokumentów (zero wycieków w atakach testowych).
 
 #### 4. Dane
 Status: **Z**. Źródło w karcie: A, G, H.
