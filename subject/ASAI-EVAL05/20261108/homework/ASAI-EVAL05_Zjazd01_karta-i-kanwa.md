@@ -66,13 +66,13 @@ Kanwa: pole 3. Status: **Z**
 
 *Opis pola: co ma się poprawić dzięki systemowi, zapisane tak, żeby dało się to sprawdzić: Jeżeli [system robi X], to dla [kogo] poprawi się [rezultat], mierzone [jak], w horyzoncie [kiedy], bez pogorszenia [czego]. Rezultat dla ludzi, nie opis systemu.*
 
-Jeżeli asystent odpowiada pracownikom tylko z dokumentów, do których mają prawo, i nie wysyła danych osobowych do dostawcy modelu, to dla pracowników serwisu, HR i kierowników poprawi się dostęp do informacji, mierzone oceną jakości odpowiedzi na 30–50 pytaniach testowych, bez pogorszenia ochrony osób z dokumentów: zero wycieków w atakach testowych.
+Jeżeli asystent odpowiada pracownikom serwisu tylko z dokumentów, do których mają prawo, i nie wysyła danych osobowych do dostawcy modelu, to pracownicy serwisu szybciej przygotują się do obsługi klienta (warunki umowy, historia zgłoszeń), mierzone czasem znalezienia odpowiedzi, z ok. 15 do ok. 2 minut [Z], i odsetkiem pytań, które muszą sprawdzić ręcznie, w horyzoncie 10 tygodni (do końca stycznia 2027), bez pogorszenia ochrony osób z dokumentów: zero wycieków w atakach testowych.
 
 #### A3. Zamierzone przeznaczenie
 
 *Opis pola: granice systemu. Służy do: jedno zadanie. Nie służy do: rzeczy, do których ktoś mógłby go użyć, a nie powinien.*
 
-**Służy do:** odpowiadania pracownikom na pytania na podstawie dokumentów firmy, do których pytający ma dostęp.
+**Służy do:** odpowiadania pracownikom serwisu na pytania o umowy i zgłoszenia klientów na podstawie dokumentów firmy, do których pytający ma dostęp.
 
 **Nie służy do:**
 1. decyzji kadrowych ani oceny pracowników (np. na podstawie notatek HR),
@@ -89,7 +89,7 @@ Kanwa: nagłówek.
 | Pole | Wartość |
 |---|---|
 | Adresat (rola lub gremium, które decyduje) | CISO i Inspektor Ochrony Danych fikcyjnej firmy |
-| Termin decyzji | koniec projektu |
+| Termin decyzji | styczeń 2027 |
 
 #### A5. Proces dziś i po zmianie
 Kanwa: pole 1.
@@ -118,7 +118,7 @@ Kanwa: pole 2. Status: **Z**
 
 | Rola | Kto | Ile osób | Uwagi |
 |---|---|---|---|
-| Korzysta z systemu | pracownicy: serwis, HR, kierownicy | brak danych | każdy widzi tylko swoje dokumenty |
+| Korzysta z systemu | pracownicy serwisu | brak danych | każdy widzi tylko swoje dokumenty |
 | Decyduje o dalszym prowadzeniu | CISO i właściciel systemu | brak danych | fikcyjna firma |
 | Ponosi skutek błędu | osoby z dokumentów (pracownicy, kontrahenci) | brak danych | nie widzą systemu ani wycieku |
 | Może zablokować wdrożenie | Inspektor Ochrony Danych, CISO, właściciel danych HR | brak danych | dane osobowe, wysyłka do dostawcy |
@@ -145,7 +145,7 @@ Kanwa: pole 6. Status: **Z**
 
 *Opis pola: po czym poznamy, że wdrożenie się udało: zmiana dla ludzi z A2, nie wynik modelu, np. nie „90% trafności”.*
 
-Pracownik dostaje dobrą odpowiedź tylko z dokumentów, do których ma prawo, a dane osób nie wyciekają do innych ani do dostawcy.
+Pracownik serwisu przed rozmową z klientem szybciej dostaje dobrą odpowiedź ze źródłem, tylko z dokumentów, do których ma prawo, a dane osób nie wyciekają do innych ani do dostawcy.
 
 #### B2. Porażki
 Kanwa: pole 5.
@@ -171,8 +171,8 @@ Porażka 1. Po jednym wycieku danych spoza uprawnień wyłączamy agentowi dost�
 
 | Pytanie | Nasza odpowiedź albo czego jeszcze nie wiemy | Status |
 |---|---|---|
-| 1. (do uzupełnienia na zajęciach) | | |
-| 2. (do uzupełnienia na zajęciach) | | |
+| 1. (A2) Skąd wiemy, że pracownik serwisu szuka dziś odpowiedzi ok. 15 minut, a z asystentem zajmie mu to ok. 2 minuty? | Nie wiemy. 15 min to szacunek z doświadczenia zespołu, 2 min to cel. Dziś: krótki pomiar czasu na 10–20 sprawach, potwierdzą kierownicy serwisu. Z asystentem: pomiar w labie na pytaniach testowych (czas odpowiedzi + sprawdzenie źródła przez człowieka). | Z |
+| 2. (B3) Skąd wiemy, że wyciek danych spoza uprawnień w ogóle zauważymy, skoro osoba, której dotyczą, systemu nie widzi? | W labie: kanarki w dokumentach poufnych, kontrola wyjścia i zapis każdej decyzji w tabeli audytu. W prawdziwej firmie bez kanarków tego jeszcze nie wiemy; sprawdzimy, jaki odsetek ataków da się odtworzyć z audytu. | Z |
 
 ---
 
@@ -218,7 +218,7 @@ Status: **Z**. Źródło w karcie: A.
 
 *Opis pola: kto korzysta, kto decyduje, kto ponosi skutek błędu, kto może zablokować? Konkretne stanowiska; ponoszący skutek błędu często nie korzysta.*
 
-- **Korzysta:** pracownicy serwisu, HR, kierownicy.
+- **Korzysta:** pracownicy serwisu.
 - **Decyduje:** CISO i właściciel systemu.
 - **Ponosi skutek:** osoby z dokumentów (pracownicy, kontrahenci), które systemu nie widzą.
 - **Może zablokować:** Inspektor Ochrony Danych, CISO, właściciel danych HR.
@@ -228,7 +228,7 @@ Status: **Z**. Źródło w karcie: A, E.
 
 *Opis pola: jeżeli system robi X, to dla kogo poprawi się co, mierzone jak, kiedy, bez pogorszenia czego? Rezultat, nie opis systemu; „bez pogorszenia” jest obowiązkowe.*
 
-Jeżeli asystent odpowiada tylko z dokumentów, do których pytający ma prawo, i nie wysyła danych osobowych do dostawcy modelu, to dla pracowników poprawi się dostęp do informacji, mierzone oceną jakości na 30–50 pytaniach testowych, w 10 tygodni, bez pogorszenia ochrony osób z dokumentów (zero wycieków w atakach testowych).
+Jeżeli asystent odpowiada pracownikom serwisu tylko z dokumentów, do których mają prawo, i nie wysyła danych osobowych do dostawcy modelu, to szybciej przygotują się do obsługi klienta, mierzone czasem znalezienia odpowiedzi (z ok. 15 do ok. 2 min [Z]) i % pytań sprawdzanych ręcznie, w 10 tygodni (do końca stycznia 2027), bez pogorszenia ochrony osób z dokumentów (zero wycieków w atakach testowych).
 
 #### 4. Dane
 Status: **Z**. Źródło w karcie: A, G, H.
